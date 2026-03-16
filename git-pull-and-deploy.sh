@@ -4,8 +4,6 @@
 # Por Daniel Accorsi - Update: 06/03/2026 (com auxilio de IA)
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# Ordem definida: emap, econtabilmap, econtrolemap, eutil, econtabilutil, eauxmodel, ecigaintegrationmap, eservices, sgmmap, econtab, erecursoshumanos, sgm, erestful
-# Nomes reais das pastas: econtabmap e econtabutil
 PROJETOS=(emap econtabmap econtrolemap sgmmap enotafiscal-ws-mapgenerator eutil eutilspring econtabutil eauxmodel ecigaintegrationmap sgmservice eservicespring eservices econtab erecursoshumanos sgm erestful erestfulspring eloginapi ejuridico etributario enotafiscal portaltransparencia elicitacao)
 BRANCH="desenvolvimento"
 
