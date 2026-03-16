@@ -6,7 +6,7 @@
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Ordem definida: emap, econtabilmap, econtrolemap, eutil, econtabilutil, eauxmodel, ecigaintegrationmap, eservices, sgmmap, econtab, erecursoshumanos, sgm, erestful
 # Nomes reais das pastas: econtabmap e econtabutil
-PROJETOS=(emap econtabmap econtrolemap sgmmap enotafiscal-ws-mapgenerator eutil eutilspring econtabutil eauxmodel ecigaintegrationmap sgmservice eservicespring eservices econtab erecursoshumanos sgm erestful erestfulspring eloginapi ejuridico etributario)
+PROJETOS=(emap econtabmap econtrolemap sgmmap enotafiscal-ws-mapgenerator eutil eutilspring econtabutil eauxmodel ecigaintegrationmap sgmservice eservicespring eservices econtab erecursoshumanos sgm erestful erestfulspring eloginapi ejuridico etributario enotafiscal portaltransparencia elicitacao)
 BRANCH="desenvolvimento"
 
 echo "=============================================="
@@ -73,7 +73,7 @@ for projeto in "${PROJETOS[@]}"; do
                 echo "*** Falha no deploy: $projeto"
                 FALHAS_DEPLOY+=("$projeto")
             fi
-        elif [[ $projeto == "ejuridico" ]]; then
+        elif [[ $projeto == "ejuridico" || $projeto == "erestfulspring" ]]; then
             if ! (cd "$dir" && mvn clean install -DskipTests); then
                 echo "*** Falha no deploy: $projeto"
                 FALHAS_DEPLOY+=("$projeto")
