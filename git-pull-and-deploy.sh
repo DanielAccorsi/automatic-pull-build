@@ -4,8 +4,8 @@
 # Por Daniel Accorsi - Update: 06/03/2026 (com auxilio de IA)
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJETOS=(projeto1 projeto2 projeto3)
-BRANCH="desenvolvimento" # branch padrão de desenvolvimento local
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/projetos-list.sh"
+BRANCH="desenvolvimento"
 
 echo "=============================================="
 echo "  Pull / Deploy de todos os projetos"
