@@ -4,7 +4,7 @@
 # Por Daniel Accorsi - Update: 06/03/2026 (com auxilio de IA)
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJETOS=(emap econtabmap econtrolemap sgmmap enotafiscal-ws-mapgenerator eutil eutilspring econtabutil eauxmodel ecigaintegrationmap sgmservice eservicespring eservices econtab erecursoshumanos sgm erestful erestfulspring eloginapi ejuridico etributario enotafiscal portaltransparencia elicitacao)
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/projetos-list.sh"
 BRANCH="desenvolvimento"
 
 echo "=============================================="
