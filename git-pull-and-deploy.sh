@@ -5,7 +5,9 @@
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/projetos-list.sh"
-BRANCH="desenvolvimento"
+# Projetos que receberam commits novos no pull (Fase 1) e quantidade de arquivos tocados
+PROJETOS_ALTERADOS=()
+ARQUIVOS_ALTERADOS=()
 
 echo "=============================================="
 echo "  Pull / Deploy de todos os projetos"
@@ -23,18 +25,30 @@ for projeto in "${PROJETOS[@]}"; do
         echo ""
         echo ">>> Entrando em: $projeto"
         if [[ $projeto == "ecigaintegrationmap" ]]; then
-            BRANCH="" 
+            branch_pull=""
         else
-            BRANCH="desenvolvimento"
+            branch_pull="desenvolvimento"
         fi
         echo "+ cd \"$dir\""
-        #echo "+ git checkout $BRANCH"
-        echo "+ git pull origin $BRANCH"
-        #if ! (cd "$dir" && git checkout $BRANCH && git pull origin $BRANCH); then
-        if ! (cd "$dir" && git pull origin $BRANCH); then
+        echo "+ git pull origin $branch_pull"
+        pushd "$dir" >/dev/null || {
+            echo "*** Não foi possível entrar em: $dir. Abortando execução."
+            exit 1
+        }
+        old_head=$(git rev-parse HEAD 2>/dev/null) || old_head=""
+        if ! git pull origin $branch_pull; then
+            popd >/dev/null
             echo "*** Falha no pull: $projeto. Abortando execução."
             exit 1
         fi
+        new_head=$(git rev-parse HEAD)
+        if [[ -n "$old_head" && "$old_head" != "$new_head" ]]; then
+            num_arquivos=$(git diff --name-only "$old_head" "$new_head" 2>/dev/null | wc -l)
+            num_arquivos=$(echo "$num_arquivos" | tr -d ' \t\r\n')
+            PROJETOS_ALTERADOS+=("$projeto")
+            ARQUIVOS_ALTERADOS+=("$num_arquivos")
+        fi
+        popd >/dev/null
     else
         echo "*** Diretório não encontrado: $projeto ($dir). Abortando execução."
         exit 1
@@ -55,9 +69,9 @@ echo ""
 #fi
 
 echo ""
-echo "=============================================="
+echo "==========================================================="
 echo "  FASE 2: Maven clean install em cada projeto"
-echo "=============================================="
+echo "==========================================================="
 
 FALHAS_DEPLOY=()
 MAVEN_START=$(date +%s)
@@ -91,13 +105,13 @@ done
 MAVEN_END=$(date +%s)
 
 echo ""
-echo "=============================================="
+echo "==========================================================="
 echo "  Fase 2 (Deploy) concluída."
-echo "=============================================="
+echo "==========================================================="
 echo ""
-echo "=============================================="
+echo "==========================================================="
 echo "  RELATÓRIO - Projetos com falha no deploy"
-echo "=============================================="
+echo "==========================================================="
 if [[ ${#FALHAS_DEPLOY[@]} -eq 0 ]]; then
     echo "  Nenhum."
 else
@@ -105,11 +119,25 @@ else
         echo "  - $p"
     done
 fi
-echo "=============================================="
+echo "==========================================================="
 echo ""
-echo "=============================================="
+echo "==========================================================="
+echo "  RELATÓRIO - Fase 1 Git (atualizações do remoto)"
+echo "==========================================================="
+TOTAL_COM_ALTERACAO=${#PROJETOS_ALTERADOS[@]}
+echo "  Total de projetos com alteração (novo commit após pull): $TOTAL_COM_ALTERACAO"
+if [[ $TOTAL_COM_ALTERACAO -eq 0 ]]; then
+    echo "  Detalhe: nenhum — repositórios já estavam alinhados com o remoto."
+else
+    for i in "${!PROJETOS_ALTERADOS[@]}"; do
+        echo "  - ${PROJETOS_ALTERADOS[$i]}: ${ARQUIVOS_ALTERADOS[$i]} arquivo(s) alterado(s)"
+    done
+fi
+echo "==========================================================="
+echo ""
+echo "==========================================================="
 echo "  TEMPOS DE EXECUÇÃO"
-echo "=============================================="
+echo "==========================================================="
 PULL_DUR=$((PULL_END - PULL_START))
 MAVEN_DUR=$((MAVEN_END - MAVEN_START))
 PULL_MIN=$((PULL_DUR / 60))
@@ -118,4 +146,4 @@ MAVEN_MIN=$((MAVEN_DUR / 60))
 MAVEN_SEC=$((MAVEN_DUR % 60))
 printf "  Git Pull (todos): %d min %d s\n" "$PULL_MIN" "$PULL_SEC"
 printf "  Maven (todos):   %d min %d s\n" "$MAVEN_MIN" "$MAVEN_SEC"
-echo "=============================================="
+echo "==========================================================="
