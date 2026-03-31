@@ -24,6 +24,17 @@ Cada nome em `projetos-list.sh` deve ser uma pasta contendo um clone Git dos pro
 
 Os nomes dos repositórios ficam no arquivo **`projetos-list.sh`** (array `PROJETOS`). Edite esse arquivo para incluir ou remover projetos; o script principal apenas importa a lista com `source`.
 
+Essa lista é padrão bash também, e precisa criar uma variável de array:
+
+```bash
+#!/bin/bash
+PROJETOS=(
+  projeto1
+  projeto2
+  projeto3
+)
+```
+
 ## Como executar
 
 No **Linux**, **macOS** ou **Git Bash** no Windows (precisa de `bash`, `git` e `mvn` no `PATH`):
