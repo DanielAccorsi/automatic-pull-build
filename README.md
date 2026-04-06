@@ -9,6 +9,7 @@ Coloque a pasta **`.pulls`** (ou outro nome que você colocou na pasta) no **mes
 ```text
 projetos/
 ├── .pulls/
+│   ├── custom-maven-params.txt
 │   ├── git-pull-and-deploy.sh
 │   ├── projetos-list.sh
 │   └── README.md
@@ -35,6 +36,19 @@ PROJETOS=(
 )
 ```
 
+## Parâmetros Maven Customizados
+
+Se alguns projetos exigirem argumentos específicos no build (como pular testes ou ignorar erros de documentação), você pode criar/editar um arquivo chamado **`custom-maven-params.txt`** junto do script principal. 
+
+Cada linha deve ter o formato `projeto=parametros`:
+
+```text
+projeto1=-Dadditionalparam=-Xdoclint:none
+projeto2=-DskipTests
+```
+
+Se o arquivo não existir ou o projeto não estiver listado nele, o build continuará usando o clássico `mvn clean install`.
+
 ## Como executar
 
 No **Linux**, **macOS** ou **Git Bash** no Windows (precisa de `bash`, `git` e `mvn` no `PATH`):
@@ -53,8 +67,8 @@ chmod +x git-pull-and-deploy.sh
 
 ## O que o script faz
 
-1. **Fase 1 — Git:** em cada projeto, executa `git pull origin desenvolvimento`. O projeto `ecigaintegrationmap` usa `git pull origin` (sem nome de branch). O script **não** faz `checkout` automático: o pull integra o remoto na **branch em que você estiver** naquele repositório.
-2. **Fase 2 — Maven:** em pastas que tenham `pom.xml`, roda `mvn clean install` (com exceções já definidas no script para alguns projetos).
+1. **Fase 1 — Git:** em cada projeto, executa `git pull origin desenvolvimento`. O script **não** faz `checkout` automático: o pull integra o remoto na **branch em que você estiver** naquele repositório.
+2. **Fase 2 — Maven:** em pastas que tenham `pom.xml`, roda `mvn clean install` (se o projeto tiver uma configuração customizada no arquivo `custom-maven-params.txt`, os parâmetros definidos lá complementarão ou alterarão o comando).
 
 Se algum pull falhar, a execução **para** naquele projeto.
 
