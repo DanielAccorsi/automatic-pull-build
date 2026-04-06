@@ -80,13 +80,15 @@ for projeto in "${PROJETOS[@]}"; do
     if [[ -d "$dir" ]] && [[ -f "$dir/pom.xml" ]]; then
         echo ""
         echo ">>> Deploy: $projeto"
-        if [[ $projeto == "econtab" ]]; then
-            if ! (cd "$dir" && mvn clean install -Dadditionalparam=-Xdoclint:none); then
-                echo "*** Falha no deploy: $projeto"
-                FALHAS_DEPLOY+=("$projeto")
-            fi
-        elif [[ $projeto == "ejuridico" || $projeto == "erestfulspring" ]]; then
-            if ! (cd "$dir" && mvn clean install -DskipTests); then
+        PARAMETROS_CUSTOM=""
+        PARAMS_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/custom-maven-params.txt"
+        if [[ -f "$PARAMS_FILE" ]]; then
+            PARAMETROS_CUSTOM=$(grep "^$projeto=" "$PARAMS_FILE" | cut -d'=' -f2-)
+        fi
+
+        if [[ -n "$PARAMETROS_CUSTOM" ]]; then
+            echo "    -> Usando parâmetros customizados: $PARAMETROS_CUSTOM"
+            if ! (cd "$dir" && mvn clean install $PARAMETROS_CUSTOM); then
                 echo "*** Falha no deploy: $projeto"
                 FALHAS_DEPLOY+=("$projeto")
             fi
