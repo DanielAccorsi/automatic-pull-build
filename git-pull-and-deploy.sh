@@ -18,6 +18,7 @@ echo "  FASE 1: Git Pull em todos os projetos"
 echo "  Diretório base: $BASE_DIR"
 echo "=============================================="
 
+PUSH_REPO="cnpjalfa"
 PULL_START=$(date +%s)
 for projeto in "${PROJETOS[@]}"; do
     dir="$BASE_DIR/$projeto"
@@ -48,6 +49,16 @@ for projeto in "${PROJETOS[@]}"; do
             PROJETOS_ALTERADOS+=("$projeto")
             ARQUIVOS_ALTERADOS+=("$num_arquivos")
         fi
+        # Faz um push automatico para a branch se houve merge local da outra branch
+        current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+        if [[ "$current_branch" == "$PUSH_REPO" ]]; then
+            echo "+ git push origin $PUSH_REPO"
+            if ! git push origin $PUSH_REPO; then
+                popd >/dev/null
+                echo "*** Falha no push: $projeto. Abortando execução."
+                exit 1
+            fi
+        fi
         popd >/dev/null
     else
         echo "*** Diretório não encontrado: $projeto ($dir). Abortando execução."
@@ -57,9 +68,9 @@ done
 PULL_END=$(date +%s)
 
 echo ""
-echo "=============================================="
+echo "======================================================================"
 echo "  Fase 1 (Git Pull) concluída."
-echo "=============================================="
+echo "======================================================================"
 echo ""
 #read -p "Deseja entrar na fase 2 (deploy Maven clean install)? [s/N] " resposta
 #resposta="${resposta:-n}"
@@ -69,9 +80,9 @@ echo ""
 #fi
 
 echo ""
-echo "==========================================================="
+echo "======================================================================"
 echo "  FASE 2: Maven clean install em cada projeto"
-echo "==========================================================="
+echo "======================================================================"
 
 FALHAS_DEPLOY=()
 MAVEN_START=$(date +%s)
@@ -107,13 +118,13 @@ done
 MAVEN_END=$(date +%s)
 
 echo ""
-echo "==========================================================="
+echo "======================================================================"
 echo "  Fase 2 (Deploy) concluída."
-echo "==========================================================="
+echo "======================================================================"
 echo ""
-echo "==========================================================="
+echo "======================================================================"
 echo "  RELATÓRIO - Projetos com falha no deploy"
-echo "==========================================================="
+echo "======================================================================"
 if [[ ${#FALHAS_DEPLOY[@]} -eq 0 ]]; then
     echo "  Nenhum."
 else
@@ -121,11 +132,11 @@ else
         echo "  - $p"
     done
 fi
-echo "==========================================================="
+echo "======================================================================"
 echo ""
-echo "==========================================================="
+echo "======================================================================"
 echo "  RELATÓRIO - Fase 1 Git (atualizações do remoto)"
-echo "==========================================================="
+echo "======================================================================"
 TOTAL_COM_ALTERACAO=${#PROJETOS_ALTERADOS[@]}
 echo "  Total de projetos com alteração (novo commit após pull): $TOTAL_COM_ALTERACAO"
 if [[ $TOTAL_COM_ALTERACAO -eq 0 ]]; then
@@ -135,11 +146,11 @@ else
         echo "  - ${PROJETOS_ALTERADOS[$i]}: ${ARQUIVOS_ALTERADOS[$i]} arquivo(s) alterado(s)"
     done
 fi
-echo "==========================================================="
+echo "======================================================================"
 echo ""
-echo "==========================================================="
+echo "======================================================================"
 echo "  TEMPOS DE EXECUÇÃO"
-echo "==========================================================="
+echo "======================================================================"
 PULL_DUR=$((PULL_END - PULL_START))
 MAVEN_DUR=$((MAVEN_END - MAVEN_START))
 PULL_MIN=$((PULL_DUR / 60))
@@ -148,4 +159,4 @@ MAVEN_MIN=$((MAVEN_DUR / 60))
 MAVEN_SEC=$((MAVEN_DUR % 60))
 printf "  Git Pull (todos): %d min %d s\n" "$PULL_MIN" "$PULL_SEC"
 printf "  Maven (todos):   %d min %d s\n" "$MAVEN_MIN" "$MAVEN_SEC"
-echo "==========================================================="
+echo "======================================================================"
