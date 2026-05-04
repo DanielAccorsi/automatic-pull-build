@@ -49,13 +49,25 @@ for projeto in "${PROJETOS[@]}"; do
             PROJETOS_ALTERADOS+=("$projeto")
             ARQUIVOS_ALTERADOS+=("$num_arquivos")
         fi
-        # Faz um push automatico para a branch se houve merge local da outra branch
+        
+        # Pega a branch atual e verificar se é a cnpjalfa
         current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
         if [[ "$current_branch" == "$PUSH_REPO" ]]; then
+
+            # Faz um pull na branch cnpjalfa para garantir que pegou os ultimos commits
+            # Tem mais de um dev trabalhando com essa branch
+            echo "+ git pull origin $PUSH_REPO"
+            if ! git pull origin $PUSH_REPO; then
+                popd >/dev/null
+                echo "*** Falha no pull: $projeto para a branch $PUSH_REPO. Abortando execução."
+                exit 1
+            fi
+            
+            # Faz um push automatico para a branch se houve merge local da outra branch
             echo "+ git push origin $PUSH_REPO"
             if ! git push origin $PUSH_REPO; then
                 popd >/dev/null
-                echo "*** Falha no push: $projeto. Abortando execução."
+                echo "*** Falha no push: $projeto para a branch $PUSH_REPO. Abortando execução."
                 exit 1
             fi
         fi
